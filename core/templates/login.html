@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>СаСЗМ — Вход</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1a202c;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .container {
+            width: 420px;
+            max-width: 90%;
+            padding: 40px 35px;
+            background: #2d3748;
+            border-radius: 12px;
+            border: 1px solid #3a4455;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            animation: fadeIn 0.6s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo img {
+            height: 40px;
+            width: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .logo p {
+            font-size: 14px;
+            color: #a0aec0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #cbd5e0;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #3a4455;
+            border: 1px solid #4a5568;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74,144,226,0.2);
+        }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #a0aec0;
+        }
+        .remember-me input {
+            margin-right: 8px;
+            accent-color: #4a90e2;
+            width: auto;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 12px 18px;
+            background: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover {
+            background: #357abd;
+        }
+        .error-message {
+            background: rgba(229,62,62,0.15);
+            color: #fca5a5;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid rgba(229,62,62,0.3);
+        }
+        .footer-links {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 13px;
+            color: #718096;
+        }
+        .footer-links a {
+            color: #4a90e2;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover {
+            color: #63b3ed;
+            text-decoration: underline;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            width: 420px;
+            max-width: 90%;
+            padding: 35px;
+            background: #2d3748;
+            border-radius: 12px;
+            border: 1px solid #3a4455;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            animation: slideUp 0.4s ease-out;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            color: #a0aec0;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .close:hover {
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="login-container">
+        <div class="logo">
+            <img src="logo.jpg" alt="Логотип СаСЗМ">
+            <h1>СаСЗМ</h1>
+            <p>Система слежения за металлом</p>
+        </div>
+
+        <!-- Отображение ошибок -->
+        {% if form.errors %}
+            <div class="error-message">
+                Неверный логин или пароль. Попробуйте снова.
+            </div>
+        {% endif %}
+
+        {% if next %}
+            {% if user.is_authenticated %}
+                <div class="error-message">
+                    У вас нет доступа к этой странице. Обратитесь к администратору.
+                </div>
+            {% else %}
+                <input type="hidden" name="next" value="{{ next }}" />
+            {% endif %}
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Логин</label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       placeholder="Введите ваш логин" 
+                       value="{{ form.username.value|default:'' }}" 
+                       required />
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       placeholder="••••••••" 
+                       required />
+            </div>
+            
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember" />
+                <label for="remember">Запомнить меня</label>
+            </div>
+            
+            <button type="submit" class="btn-primary">Войти в систему</button>
+        </form>
+        
+        <div class="footer-links">
+            <a onclick="openModal('forgot-modal')">Забыли пароль?</a> • 
+            <a onclick="openModal('register-modal')">Регистрация</a>
+        </div>
+    </div>
+
+    <div class="modal" id="forgot-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('forgot-modal')">&times;</span>
+            <div class="logo">
+                <img src="logo.jpg" alt="Логотип СаСЗМ" style="height:40px;width:auto;border-radius:8px;">
+                <h1>Восстановление пароля</h1>
+                <p>Введите email для сброса</p>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Ссылка для сброса отправлена на email!'); closeModal('forgot-modal');">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="example@company.ru" required />
+                </div>
+                <button type="submit" class="btn-primary">Отправить</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="register-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('register-modal')">&times;</span>
+            <div class="logo">
+                <img src="logo.jpg" alt="Логотип СаСЗМ" style="height:40px;width:auto;border-radius:8px;">
+                <h1>Регистрация</h1>
+                <p>Создание новой учётной записи</p>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Заявка на регистрацию отправлена администратору!'); closeModal('register-modal');">
+                <div class="form-group">
+                    <label for="reg-fio">ФИО</label>
+                    <input type="text" id="reg-fio" placeholder="Иванов Иван Иванович" required />
+                </div>
+                <div class="form-group">
+                    <label for="reg-login">Логин</label>
+                    <input type="text" id="reg-login" placeholder="ivanov" required />
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">Email</label>
+                    <input type="email" id="reg-email" placeholder="ivanov@company.ru" required />
+                </div>
+                <button type="submit" class="btn-primary">Отправить заявку</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Открытие модального окна только по клику, без автозапуска
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.getElementById('login-container').style.display = 'none';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.getElementById('login-container').style.display = 'block';
+        }
+
+        // Убедимся, что модальные окна не открываются автоматически при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+            document.getElementById('login-container').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

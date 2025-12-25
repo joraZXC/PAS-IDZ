@@ -1,0 +1,351 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Планирование — СаСЗМ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+        body{min-height:100vh;background:linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%);color:#e0e0e0;display:flex;flex-direction:column;}
+        .container{display:flex;flex:1;min-height:100vh;}
+        .sidebar{width:280px;background:rgba(15,32,39,.98);backdrop-filter:blur(12px);border-right:1px solid rgba(255,255,255,.1);padding:30px 20px;display:flex;flex-direction:column;height:100vh;position:sticky;top:0;z-index:100;box-shadow:5px 0 20px rgba(0,0,0,.3);transition:transform .3s ease;}
+        .content{flex:1;padding:20px;overflow-y:auto;position:relative;}
+        .mobile-menu-btn{display:none;background:none;border:none;color:#e0e0e0;font-size:24px;cursor:pointer;padding:10px;position:fixed;top:15px;left:15px;z-index:1001;}
+        @media(max-width:992px){
+            .sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);z-index:1000;}
+            .sidebar.open{transform:translateX(0);}
+            .mobile-menu-btn{display:block;}
+            .content{padding:15px;}
+        }
+        @media(max-width:600px){
+            .header-bar{flex-direction:column;align-items:flex-start;}
+            .header-actions{margin-top:10px;width:100%;justify-content:space-between;}
+        }
+        .logo{display:flex;align-items:center;gap:16px;margin-bottom:40px;padding:0 10px;}
+        .logo-img{width:56px;height:56px;object-fit:contain;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.1);}
+        .logo h1{font-size:18px;font-weight:600;color:#e0e0e0;}
+        .logo h1 span{display:block;font-size:12px;color:#a0aec0;font-weight:400;margin-top:2px;}
+        .nav-menu{flex:1;display:flex;flex-direction:column;gap:8px;margin-bottom:30px;}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;color:#a0aec0;font-size:15px;font-weight:500;cursor:pointer;transition:all .3s ease;}
+        .nav-item:hover{background:rgba(74,144,226,.15);color:#e0e0e0;}
+        .nav-item.active{background:linear-gradient(90deg,#4a90e2,#357abd);color:#fff;font-weight:600;box-shadow:0 4px 15px rgba(74,144,226,.3);}
+        .nav-item .icon{width:20px;height:20px;background:currentColor;mask-size:contain;mask-repeat:no-repeat;mask-position:center;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;}
+        .icon-orders{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-4v-4h4v4zm0-6h-4V7h4v4zm5 6h-3v-4h3v4zm0-6h-3V7h3v4z"/></svg>');}
+        .icon-warehouse{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 18H5V5h14v15zM7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"/></svg>');}
+        .icon-route{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>');}
+        .icon-logout{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>');}
+        .user-section{margin-top:auto;padding:20px 16px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:12px;color:#a0aec0;font-size:14px;}
+        .user-section .avatar{width:40px;height:40px;background:#4a90e2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;font-size:16px;}
+        .header-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.1);flex-wrap:wrap;gap:10px;}
+        .page-title{font-size:22px;font-weight:600;color:#e0e0e0;}
+        .header-actions{display:flex;align-items:center;gap:10px;}
+        .timer{background:rgba(74,144,226,.2);padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;color:#a0aec0;}
+        .section{display:none;animation:fadeIn .4s ease;}
+        .section.active{display:block;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        .card{background:rgba(15,32,39,.95);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 10px 25px rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);}
+        .card-title{font-size:17px;color:#cbd5e0;display:flex;align-items:center;gap:8px;margin-bottom:15px;}
+        .card-title::before{content:'';width:6px;height:6px;background:#4a90e2;border-radius:50%;}
+        table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px;}
+        th{background:rgba(45,55,72,.8);padding:12px 10px;text-align:left;color:#cbd5e0;font-weight:500;position:sticky;top:0;z-index:1;}
+        td{padding:12px 10px;border-bottom:1px solid rgba(100,116,139,.2);color:#e0e0e0;}
+        tr:hover{background:rgba(74,144,226,.1);}
+        .btn-primary{
+            position:relative;overflow:hidden;background:#4a90e2;color:#fff;border:none;padding:10px 20px;border-radius:20px;font-weight:600;font-size:13px;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(74,144,226,.3);
+        }
+        .btn-primary:hover{background:#357abd;transform:translateY(-2px);}
+        .ripple{background:rgba(255,255,255,.3);border-radius:50%;position:absolute;transform:scale(0);animation:rippleAnim .6s linear;pointer-events:none;}
+        @keyframes rippleAnim{to{transform:scale(4);opacity:0;}}
+        .status-ready{background:#28a745;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;}
+        .status-waiting{background:#ffc107;color:#000;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;}
+        .form-group{margin-bottom:16px;}
+        .form-group label{display:block;margin-bottom:8px;color:#cbd5e0;font-size:14px;}
+        .form-group select,.form-group input{
+            width:100%;padding:10px 12px;background:rgba(45,55,72,.6);border:1px solid rgba(100,116,139,.4);border-radius:10px;color:#e0e0e0;font-size:13.5px;transition:border .3s;
+        }
+        .form-group select:focus,.form-group input:focus{border-color:#4a90e2;outline:none;}
+        .success-message{
+            position:fixed;bottom:30px;right:30px;background:#48bb78;color:#fff;padding:16px 24px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:1000;opacity:0;transform:translateY(20px);transition:all .4s ease;display:flex;align-items:center;gap:10px;font-weight:600;
+        }
+        .success-message.show{opacity:1;transform:translateY(0);}
+        .spinner{border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;width:16px;height:16px;animation:spin 1s linear infinite;}
+        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+    </style>
+</head>
+<body>
+    <div class="mobile-menu-btn" onclick="toggleSidebar()">☰</div>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <img src="{% static 'images/logo.jpg' %}" alt="Логотип СаСЗМ" class="logo-img">
+                <div>
+                    <h1>СаСЗМ<br><span>Система слежения за металлом</span></h1>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active" data-page="orders"><div class="icon icon-orders"></div><span>Заказы</span></div>
+                <div class="nav-item" data-page="warehouses"><div class="icon icon-warehouse"></div><span>Склады</span></div>
+                <div class="nav-item" data-page="routes"><div class="icon icon-route"></div><span>Маршруты</span></div>
+            </nav>
+            <div class="user-section">
+                <div class="avatar">{{ request.user.username|slice:":2"|upper }}</div>
+                <div>
+                    <div style="font-weight:600;color:#e0e0e0;">Группа планирования</div>
+                    <div style="font-size:13px;color:#a0aec0;">{{ request.user.get_full_name|default:request.user.username }}</div>
+                </div>
+            </div>
+
+            <!-- РАБОЧАЯ КНОПКА ВЫХОДА -->
+            {% csrf_token %}
+            <div class="nav-item" style="margin-top:15px;color:#feb2b2;cursor:pointer;" onclick="logout()">
+                <div class="icon icon-logout"></div><span>Выход</span>
+            </div>
+        </aside>
+
+        <main class="content">
+            <!-- ЗАКАЗЫ -->
+            <div class="section active" id="orders">
+                <header class="header-bar">
+                    <h1 class="page-title">Входящие заказы</h1>
+                    <div class="header-actions"><div class="timer">Сегодня: {{ current_date }}</div></div>
+                </header>
+
+                <div class="card">
+                    <div class="card-title">Новые и активные заказы</div>
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>№ Заказа</th>
+                                    <th>Дата приёмки</th>
+                                    <th>Срок выдачи</th>
+                                    <th>Статус</th>
+                                    <th>Объём (т)</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>ZK-2025-0015</td>
+                                    <td>22.12.2025</td>
+                                    <td>29.12.2025</td>
+                                    <td><span class="status-waiting">На планировании</span></td>
+                                    <td>150.0</td>
+                                    <td><button class="btn-primary" onclick="handleAction('Заказ ZK-2025-0015 принят в работу')">Принять в работу</button></td>
+                                </tr>
+                                <tr>
+                                    <td>ZK-2025-0014</td>
+                                    <td>20.12.2025</td>
+                                    <td>27.12.2025</td>
+                                    <td><span class="status-waiting">На планировании</span></td>
+                                    <td>98.5</td>
+                                    <td><button class="btn-primary" onclick="handleAction('Заказ ZK-2025-0014 принят в работу')">Принять в работу</button></td>
+                                </tr>
+                                <tr>
+                                    <td>ZK-2025-0013</td>
+                                    <td>18.12.2025</td>
+                                    <td>25.12.2025</td>
+                                    <td><span class="status-ready">В производстве</span></td>
+                                    <td>120.0</td>
+                                    <td><button class="btn-primary">Просмотр</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- СКЛАДЫ -->
+            <div class="section" id="warehouses">
+                <header class="header-bar">
+                    <h1 class="page-title">Доступные рулоны на складах</h1>
+                    <div class="header-actions"><div class="timer">Сегодня: {{ current_date }}</div></div>
+                </header>
+
+                <div class="card">
+                    <div class="card-title">Склад №1 — После плавки</div>
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr><th>ID Рулон</th><th>Серийный №</th><th>Вес (т)</th><th>Толщина (мм)</th><th>Ширина (мм)</th><th>Статус</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>RU-2025-101</td><td>SN-101245</td><td>22.5</td><td>10.3</td><td>1200</td><td>Готов к прокатке</td></tr>
+                                <tr><td>RU-2025-102</td><td>SN-101246</td><td>21.8</td><td>10.4</td><td>1250</td><td>Готов к прокатке</td></tr>
+                                <tr><td>RU-2025-103</td><td>SN-101247</td><td>23.1</td><td>10.2</td><td>1200</td><td>Готов к прокатке</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Склад №4 — Готовая продукция</div>
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr><th>ID Рулон</th><th>Вес (т)</th><th>Статус</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>RU-2025-060</td><td>19.5</td><td>Готов к отгрузке</td></tr>
+                                <tr><td>RU-2025-061</td><td>19.7</td><td>Готов к отгрузке</td></tr>
+                                <tr><td>RU-2025-062</td><td>20.2</td><td>Готов к отгрузке</td></tr>
+                                <tr><td>RU-2025-063</td><td>19.9</td><td>Готов к отгрузке</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- МАРШРУТЫ -->
+            <div class="section" id="routes">
+                <header class="header-bar">
+                    <h1 class="page-title">Планирование маршрутов</h1>
+                    <div class="header-actions"><div class="timer">Сегодня: {{ current_date }}</div></div>
+                </header>
+
+                <div class="card">
+                    <div class="card-title">Назначить маршрут рулону</div>
+                    <form onsubmit="handleSubmit(event, 'Маршрут назначен')">
+                        <div class="form-group">
+                            <label>Выберите рулон</label>
+                            <select required>
+                                <option value="">— Выберите —</option>
+                                <option>RU-2025-101</option>
+                                <option>RU-2025-102</option>
+                                <option>RU-2025-103</option>
+                                <option>RU-2025-089</option>
+                                <option>RU-2025-090</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Следующий этап</label>
+                            <select required>
+                                <option value="">— Выберите этап —</option>
+                                <option>Прокатка</option>
+                                <option>Термообработка</option>
+                                <option>Контроль качества (ОТК)</option>
+                                <option>Готовая продукция</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">Назначить маршрут</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Активные маршруты</div>
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr><th>ID Рулон</th><th>Текущий этап</th><th>Дата назначения</th><th>Статус</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>RU-2025-101</td><td>Прокатка</td><td>23.12.2025</td><td>В процессе</td></tr>
+                                <tr><td>RU-2025-102</td><td>Прокатка</td><td>23.12.2025</td><td>В процессе</td></tr>
+                                <tr><td>RU-2025-089</td><td>Термообработка</td><td>22.12.2025</td><td>В процессе</td></tr>
+                                <tr><td>RU-2025-090</td><td>Контроль качества</td><td>21.12.2025</td><td>Ожидает ОТК</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Уведомление об успехе -->
+    <div class="success-message" id="successMsg">
+        <div class="spinner" id="spinner"></div>
+        <span id="successText">Действие выполнено</span>
+    </div>
+
+    <script>
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.getAttribute('data-page');
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+                document.getElementById(page).classList.add('active');
+                if (window.innerWidth <= 992) document.getElementById('sidebar').classList.remove('open');
+            });
+        });
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // РАБОЧАЯ ФУНКЦИЯ ВЫХОДА
+        function logout() {
+            if (confirm('Выйти из системы?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{% url 'logout' %}";
+
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = 'csrfmiddlewaretoken';
+                csrf.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                form.appendChild(csrf);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Ripple эффект на кнопках
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = btn.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.classList.add('ripple');
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+
+                btn.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Обработка действий
+        function handleAction(message) {
+            const successText = document.getElementById('successText');
+            const successMsg = document.getElementById('successMsg');
+            successText.textContent = message;
+            successMsg.classList.add('show');
+            setTimeout(() => successMsg.classList.remove('show'), 3000);
+        }
+
+        function handleSubmit(e, messageText) {
+            e.preventDefault();
+            const btn = e.target.querySelector('.btn-primary');
+            const spinner = document.getElementById('spinner');
+            const successText = document.getElementById('successText');
+            const successMsg = document.getElementById('successMsg');
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div>';
+            successText.textContent = 'Обработка...';
+            successMsg.classList.add('show');
+            spinner.style.display = 'block';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.originalText || 'Назначить';
+                successText.textContent = messageText;
+                spinner.style.display = 'none';
+                setTimeout(() => successMsg.classList.remove('show'), 3000);
+            }, 1500);
+        }
+
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            btn.dataset.originalText = btn.textContent.trim();
+        });
+    </script>
+</body>
+</html>

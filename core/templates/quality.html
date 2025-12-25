@@ -1,0 +1,293 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ОТК — СаСЗМ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+        body{min-height:100vh;background:linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%);color:#e0e0e0;display:flex;flex-direction:column;}
+        .container{display:flex;flex:1;min-height:100vh;}
+        .sidebar{width:280px;background:rgba(15,32,39,.98);backdrop-filter:blur(12px);border-right:1px solid rgba(255,255,255,.1);padding:30px 20px;display:flex;flex-direction:column;height:100vh;position:sticky;top:0;z-index:100;box-shadow:5px 0 20px rgba(0,0,0,.3);transition:transform .3s ease;}
+        .content{flex:1;padding:20px;overflow-y:auto;position:relative;}
+        .mobile-menu-btn{display:none;background:none;border:none;color:#e0e0e0;font-size:24px;cursor:pointer;padding:10px;position:fixed;top:15px;left:15px;z-index:1001;}
+        @media(max-width:992px){
+            .sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);z-index:1000;}
+            .sidebar.open{transform:translateX(0);}
+            .mobile-menu-btn{display:block;}
+            .content{padding:15px;}
+        }
+        @media(max-width:600px){
+            .header-bar{flex-direction:column;align-items:flex-start;}
+            .header-actions{margin-top:10px;width:100%;justify-content:space-between;}
+        }
+        .logo{display:flex;align-items:center;gap:16px;margin-bottom:40px;padding:0 10px;}
+        .logo-img{width:56px;height:56px;object-fit:contain;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.1);}
+        .logo h1{font-size:18px;font-weight:600;color:#e0e0e0;}
+        .logo h1 span{display:block;font-size:12px;color:#a0aec0;font-weight:400;margin-top:2px;}
+        .nav-menu{flex:1;display:flex;flex-direction:column;gap:8px;margin-bottom:30px;}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;color:#a0aec0;font-size:15px;font-weight:500;cursor:pointer;transition:all .3s ease;}
+        .nav-item:hover{background:rgba(74,144,226,.15);color:#e0e0e0;}
+        .nav-item.active{background:linear-gradient(90deg,#4a90e2,#357abd);color:#fff;font-weight:600;box-shadow:0 4px 15px rgba(74,144,226,.3);}
+        .nav-item .icon{width:20px;height:20px;background:currentColor;mask-size:contain;mask-repeat:no-repeat;mask-position:center;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;}
+        .icon-test{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.33-.02-.64-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.61l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.14 7.14 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.45h-3.84a.5.5 0 0 0-.5.45l-.36 2.54c-.58.3-1.12.66-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L3.86 10.5a.5.5 0 0 0 .12.61l2.03 1.58c-.04.3-.06.61-.06.94 0 .33.02.64.06.94l-2.03 1.58a.5.5 0 0 0-.12.61l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.38 1.04.7 1.62.94l.36 2.54a.5.5 0 0 0 .5.45h3.84a.5.5 0 0 0 .5-.45l.36-2.54c.58-.24 1.12-.56 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>');}
+        .icon-passport{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>');}
+        .icon-logout{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>');}
+        .user-section{margin-top:auto;padding:20px 16px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:12px;color:#a0aec0;font-size:14px;}
+        .user-section .avatar{width:40px;height:40px;background:#4a90e2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;font-size:16px;}
+        .header-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.1);flex-wrap:wrap;gap:10px;}
+        .page-title{font-size:22px;font-weight:600;color:#e0e0e0;}
+        .header-actions{display:flex;align-items:center;gap:10px;}
+        .timer{background:rgba(74,144,226,.2);padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;color:#a0aec0;}
+        .section{display:none;animation:fadeIn .4s ease;}
+        .section.active{display:block;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        .card{background:rgba(15,32,39,.95);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 10px 25px rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);}
+        .card-title{font-size:17px;color:#cbd5e0;display:flex;align-items:center;gap:8px;margin-bottom:15px;}
+        .card-title::before{content:'';width:6px;height:6px;background:#4a90e2;border-radius:50%;}
+        .form-group{margin-bottom:16px;}
+        .form-group label{display:block;margin-bottom:8px;color:#cbd5e0;font-size:14px;}
+        .form-group input,.form-group select,.form-group textarea{
+            width:100%;padding:10px 12px;background:rgba(45,55,72,.6);border:1px solid rgba(100,116,139,.4);border-radius:10px;color:#e0e0e0;font-size:13.5px;transition:border .3s;
+        }
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#4a90e2;outline:none;}
+        .form-group input:disabled{background:rgba(45,55,72,.4);color:#a0aec0;}
+        .form-group textarea{resize:vertical;min-height:100px;}
+        .btn-primary{
+            position:relative;overflow:hidden;background:#4a90e2;color:#fff;border:none;padding:10px 20px;border-radius:20px;font-weight:600;font-size:13px;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(74,144,226,.3);
+        }
+        .btn-primary:hover{background:#357abd;transform:translateY(-2px);}
+        .ripple{background:rgba(255,255,255,.3);border-radius:50%;position:absolute;transform:scale(0);animation:rippleAnim .6s linear;pointer-events:none;}
+        @keyframes rippleAnim{to{transform:scale(4);opacity:0;}}
+        .roll-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px dashed rgba(100,116,139,.3);font-size:13.5px;}
+        .roll-item:last-child{border-bottom:none;}
+        .status-pending{color:#ffc700;font-weight:600;}
+        .status-passed{color:#38a169;font-weight:600;}
+        .status-failed{color:#e53e3e;font-weight:600;}
+        .success-message{
+            position:fixed;bottom:30px;right:30px;background:#48bb78;color:#fff;padding:16px 24px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:1000;opacity:0;transform:translateY(20px);transition:all .4s ease;display:flex;align-items:center;gap:10px;font-weight:600;
+        }
+        .success-message.show{opacity:1;transform:translateY(0);}
+        .spinner{border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;width:16px;height:16px;animation:spin 1s linear infinite;}
+        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+    </style>
+</head>
+<body>
+    <div class="mobile-menu-btn" onclick="toggleSidebar()">☰</div>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <img src="{% static 'images/logo.jpg' %}" alt="Логотип СаСЗМ" class="logo-img">
+                <div>
+                    <h1>СаСЗМ<br><span>Система слежения за металлом</span></h1>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active" data-page="test"><div class="icon icon-test"></div><span>Хим. тест</span></div>
+                <div class="nav-item" data-page="passport"><div class="icon icon-passport"></div><span>Паспорт плавки</span></div>
+            </nav>
+            <div class="user-section">
+                <div class="avatar">{{ request.user.username|slice:":2"|upper }}</div>
+                <div>
+                    <div style="font-weight:600;color:#e0e0e0;">Служба ОТК</div>
+                    <div style="font-size:13px;color:#a0aec0;">{{ request.user.get_full_name|default:request.user.username }}</div>
+                </div>
+            </div>
+
+            <!-- РАБОЧАЯ КНОПКА ВЫХОДА -->
+            {% csrf_token %}
+            <div class="nav-item" style="margin-top:15px;color:#feb2b2;cursor:pointer;" onclick="logout()">
+                <div class="icon icon-logout"></div><span>Выход</span>
+            </div>
+        </aside>
+
+        <main class="content">
+            <!-- Химический тест -->
+            <div class="section active" id="test">
+                <header class="header-bar">
+                    <h1 class="page-title">Занесение химического теста</h1>
+                    <div class="header-actions"><div class="timer">Сегодня: {{ current_date }}</div></div>
+                </header>
+
+                <div class="card">
+                    <div class="card-title">Новый химический тест</div>
+                    <form onsubmit="handleSubmit(event, 'Химический тест сохранён')">
+                        <div class="form-group">
+                            <label>Рулон</label>
+                            <select required>
+                                <option value="">Выберите рулон</option>
+                                <option>RU-2025-101 (22.5 т)</option>
+                                <option>RU-2025-102 (21.8 т)</option>
+                                <option>RU-2025-089 (20.1 т)</option>
+                                <option>RU-2025-090 (19.7 т)</option>
+                                <option>RU-2025-075 (19.8 т)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Номер теста</label>
+                            <input type="text" placeholder="Автогенерация или вручную" />
+                        </div>
+                        <div class="form-group">
+                            <label>Номер пробы</label>
+                            <input type="text" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Результат теста</label>
+                            <select required>
+                                <option value="">Выберите результат</option>
+                                <option value="true">Прошёл (соответствует нормам)</option>
+                                <option value="false">Брак (не соответствует)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Параметры теста</label>
+                            <textarea rows="5" placeholder="C: 0.12%, Si: 0.25%, Mn: 1.45%, P: 0.015%, S: 0.008% и т.д."></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">Сохранить тест</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Последние тесты</div>
+                    <div class="roll-item"><span>RU-2025-101</span><span class="status-passed">Прошёл</span></div>
+                    <div class="roll-item"><span>RU-2025-102</span><span class="status-passed">Прошёл</span></div>
+                    <div class="roll-item"><span>RU-2025-089</span><span class="status-pending">Ожидает</span></div>
+                    <div class="roll-item"><span>RU-2025-090</span><span class="status-failed">Брак (S > 0.03%)</span></div>
+                    <div class="roll-item"><span>RU-2025-075</span><span class="status-passed">Прошёл</span></div>
+                </div>
+            </div>
+
+            <!-- Паспорт плавки -->
+            <div class="section" id="passport">
+                <header class="header-bar">
+                    <h1 class="page-title">Генерация паспорта плавки</h1>
+                    <div class="header-actions"><div class="timer">Сегодня: {{ current_date }}</div></div>
+                </header>
+
+                <div class="card">
+                    <div class="card-title">Новый паспорт плавки</div>
+                    <form onsubmit="handleSubmit(event, 'Паспорт плавки сгенерирован')">
+                        <div class="form-group">
+                            <label>Заказчик / Заказ</label>
+                            <input type="text" placeholder="Например: ЗК-2025-045" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Номер паспорта</label>
+                            <input type="text" placeholder="ПС-2025-0124" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Информация о плавке</label>
+                            <textarea rows="6" placeholder="Марка стали: Ст3сп, химический состав, механические свойства, результаты тестов ОТК и т.д."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Дата выдачи</label>
+                            <input type="date" value="2025-12-23" />
+                        </div>
+                        <button type="submit" class="btn-primary">Сгенерировать и сохранить</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Сгенерированные паспорта</div>
+                    <div class="roll-item"><span>ПС-2025-0123</span><span class="status-passed">Выдан (RU-2025-060, 19.5 т)</span></div>
+                    <div class="roll-item"><span>ПС-2025-0122</span><span class="status-passed">Выдан (RU-2025-061, 19.7 т)</span></div>
+                    <div class="roll-item"><span>ПС-2025-0121</span><span class="status-passed">Выдан (RU-2025-062, 20.2 т)</span></div>
+                    <div class="roll-item"><span>ПС-2025-0120</span><span class="status-passed">Выдан (RU-2025-063, 19.9 т)</span></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Уведомление об успехе -->
+    <div class="success-message" id="successMsg">
+        <div class="spinner" id="spinner"></div>
+        <span id="successText">Действие выполнено</span>
+    </div>
+
+    <script>
+        // Навигация
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.getAttribute('data-page');
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+                document.getElementById(page).classList.add('active');
+                if (window.innerWidth <= 992) document.getElementById('sidebar').classList.remove('open');
+            });
+        });
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // РАБОЧАЯ ФУНКЦИЯ ВЫХОДА
+        function logout() {
+            if (confirm('Выйти из системы?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{% url 'logout' %}";
+
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = 'csrfmiddlewaretoken';
+                csrf.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                form.appendChild(csrf);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Ripple эффект
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = btn.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.classList.add('ripple');
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+
+                btn.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Обработка форм
+        function handleSubmit(e, messageText) {
+            e.preventDefault();
+            const btn = e.target.querySelector('.btn-primary');
+            const spinner = document.getElementById('spinner');
+            const successText = document.getElementById('successText');
+            const successMsg = document.getElementById('successMsg');
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div>';
+            successText.textContent = 'Обработка...';
+            successMsg.classList.add('show');
+            spinner.style.display = 'block';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.originalText || 'Сохранить';
+                successText.textContent = messageText;
+                spinner.style.display = 'none';
+
+                setTimeout(() => successMsg.classList.remove('show'), 3000);
+            }, 1500);
+        }
+
+        // Сохраняем текст кнопок
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            btn.dataset.originalText = btn.textContent.trim();
+        });
+    </script>
+</body>
+</html>

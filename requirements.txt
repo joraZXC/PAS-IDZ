@@ -1,0 +1,29 @@
+# Основной фреймворк
+Django==5.2.2
+
+# PostgreSQL драйвер
+psycopg[binary]==3.2.3
+
+# Django REST Framework и связанные пакеты
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
+django-filter==24.3                # Для фильтрации в API (по дате, статусу и т.д.)
+dj-database-url==2.2.0             # Для парсинга DATABASE_URL из окружения (обязательно!)
+
+# CORS (для работы с frontend на другом порту)
+django-cors-headers==4.4.0
+
+# Redis и кэширование
+django-redis==5.4.0
+redis==5.0.8
+
+# Bootstrap для админки и шаблонов (если планируешь использовать HTML-шаблоны)
+django-bootstrap5==24.3
+
+# Дополнительные удобные пакеты (рекомендую для разработки и продакшена)
+gunicorn==23.0.0                   # WSGI-сервер для production (вместо runserver)
+whitenoise==6.7.0                  # Для обслуживания static/media в production без Nginx
+python-dotenv==1.0.1               # Если захочешь .env-файлы локально (необязательно с Docker)
+
+# Опционально: для отладки и разработки
+# django-debug-toolbar==4.4.6      # Раскомментируй, если нужен мощный дебаггер в браузере
